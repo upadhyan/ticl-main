@@ -85,3 +85,47 @@ Models use nested dict configs (see `model_configs.py` for defaults). CLI parsin
 
 ### Model Persistence
 Models are saved as `(model_state_dict, optimizer_state_dict, scheduler, config_sample)` tuples via `torch.save` with `cloudpickle`. Prediction classes can auto-download pretrained checkpoints via `utils.fetch_model()`.
+
+## Sub-Repositories
+
+This project includes two additional related repositories for differentiable decision tree research.
+
+### dtsemnet-main/ — DTSemNet
+Invertible encoding of Oblique Decision Trees as Neural Networks, enabling training via vanilla gradient descent (ECAI-2024). Also includes a DGT baseline.
+
+**Setup** (separate conda env):
+```bash
+conda env create -f dtsemnet-main/environment.yml
+conda activate dtsemnet
+python -m pip install -e dtsemnet-main/
+```
+Note: `setup.py` builds a Cython extension (`cro_dt.cythonfns.TreeEvaluation`).
+
+**Running experiments:**
+```bash
+# Small classification (depth-4 tree, all datasets, 1 sim)
+python -m src.net_train --model dtsemnet --dataset all --depth 4 -s 1 --output_prefix dtsemnet --verbose True
+
+# Large classification with GPU (e.g. MNIST)
+python -m src.net_train2 --model dtsemnet --dataset mnist -s 1 --output_prefix dtsemnet --verbose True -g
+
+# Regression
+python -m src.reg_train_linear --model dtregnet --dataset ailerons -s 1 --output_prefix ailerons --verbose True -g
+```
+Run from within `dtsemnet-main/`. Replace `dtsemnet` with `dgt` for the DGT baseline. Use `-s 100` for small DTs and `-s 10` for large DTs for paper-comparable results. Logs go to `results/`.
+
+**Key source files:** `src/dtsemnet.py` (core model), `src/net_train.py` (small datasets), `src/net_train2.py` (large datasets, GPU), `src/reg_train_linear.py` (regression), `src/sup_configs*.py` (hyperparameter configs per model/task).
+
+### RADDT-main/ — RADDT
+Differentiable decision trees via "ReLU+Argmin" reformulation with softmin approximation (NeurIPS 2025 Spotlight). Supports classification and regression. Available in single-GPU/CPU and distributed multi-GPU (DDP) versions.
+
+**Requirements:** PyTorch 2.0.1, Python 3.9.6, scikit-learn, numpy, pandas, h5py. No conda env file provided; install dependencies manually.
+
+**Running experiments (single GPU/CPU):**
+```bash
+cd RADDT-main/singleGPUorCPUVersion
+python ./test/test_RADDT.py 3 3 1 1 2 3000 "cuda" 10 5
+```
+For multi-GPU DDP, see job scripts in `distributedMultiGPUVersion/sh_narval_MultiGPU/`.
+
+**Key source files:** `src/RADDT.py` (main algorithm), `src/treeFunc.py` (tree utilities), `src/warmStart.py` (CART-based initialization), `src/dataset.py` (data loading), `src/ancestorTF_File/` (precomputed tree path routing in h5 format).
