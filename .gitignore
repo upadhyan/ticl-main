@@ -173,7 +173,6 @@ mothernet/models_diff/
 *.csv
 
 mothernet/results
-*.pdf
 *.png
 *.pickle
 *.prof
