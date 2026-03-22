@@ -1,0 +1,32 @@
+trigger:
+- main
+- develop
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- script: |
+    echo "Installing Miniconda..."
+    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+    bash miniconda.sh -b -p $HOME/miniconda
+  displayName: 'Install Miniconda'
+
+- script: |
+    echo "Creating Conda environment..."
+    $HOME/miniconda/bin/conda env create -f environment.yml
+  displayName: 'Create Conda environment'
+
+- script: |
+    echo "Activating Conda environment..."
+    source $HOME/miniconda/bin/activate
+    conda activate ticl
+    echo "Running tests..."
+    ls
+    pytest -sv ticl/tests/ --durations 40
+  displayName: 'Run tests'
+
+- task: Cache@2
+  inputs:
+    key: '"6/04/2024" | "first_additive" | "not_a_filename"'
+    path: "ticl/models_diff/"
