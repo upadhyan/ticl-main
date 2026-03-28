@@ -7,8 +7,9 @@ Modify MotherNet to predict a decision tree instead of an MLP. Both DTSemNet and
 ## Shared Foundation
 
 Both models represent an oblique binary tree of depth D with:
-- T_B = 2^D - 1 branch nodes
-- T_L = 2^D leaf nodes
+- $T_B = 2^D - 1$ branch nodes
+- 
+- $T_L = 2^D$ leaf nodes
 
 ### Weight Matrices (Identical in Both)
 
